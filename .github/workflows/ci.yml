@@ -1,5 +1,10 @@
 name: remote ssh command
 on: [push]
+
+env:
+  FOO: "BAR"
+  BAR: "FOO"
+
 jobs:
 
   build:
@@ -39,6 +44,7 @@ jobs:
           ls -al
 
     # - name: stop script if command error
+    #   if: always()
     #   uses: ./
     #   with:
     #     host: ${{ secrets.HOST }}
@@ -70,16 +76,18 @@ jobs:
         FOO: "BAR"
         BAR: "FOO"
         SHA: ${{ github.sha }}
+        PORT: ${{ secrets.PORT }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        envs: FOO,BAR,SHA
+        envs: FOO,BAR,SHA,PORT
         script: |
           echo "I am $FOO, thanks"
           echo "I am $BAR, thanks"
           echo "sha: $SHA"
+          echo "port: $PORT"
 
     - name: ssh key passphrase
       uses: ./
