@@ -163,6 +163,27 @@ See the detail information about [SSH login without password](http://www.linuxpr
 * Change the permissions of `.ssh` to 700
 * Change the permissions of `.ssh/authorized_keys2` to 640
 
+### If you are using OpenSSH
+
+If you are currently using OpenSSH and are getting the following error:
+
+```bash
+ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey]
+```
+
+Make sure that your key algorithm of choice is supported. On Ubuntu 20.04 or later you must explicitly allow the use of the ssh-rsa algorithm. Add the following line to your OpenSSH daemon file (which is either `/etc/ssh/sshd_config` or a drop-in file under 
+`/etc/ssh/sshd_config.d/`):
+
+```bash
+CASignatureAlgorithms +ssh-rsa
+```
+
+Alternatively, `ed25519` keys are accepted by default in OpenSSH. You could use this instead of rsa if needed:
+
+```bash
+ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
+```
+
 ### Example
 
 #### Executing remote ssh commands using password
@@ -269,7 +290,7 @@ See the detail information about [SSH login without password](http://www.linuxpr
       username: ${{ secrets.USERNAME }}
       key: ${{ secrets.KEY }}
       port: ${{ secrets.PORT }}
-+     envs: FOO,BAR
++     envs: FOO,BAR,SHA
       script: |
         echo "I am $FOO"
         echo "I am $BAR"
@@ -355,7 +376,7 @@ Host FooServer
 #### Protecting a Private Key
 
 The purpose of the passphrase is usually to encrypt the private key.
-This makes the key file by itself useless to an attacker. 
+This makes the key file by itself useless to an attacker.
 It is not uncommon for files to leak from backups or decommissioned hardware, and hackers commonly exfiltrate files from compromised systems.
 
 ```diff
