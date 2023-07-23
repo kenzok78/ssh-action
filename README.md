@@ -47,6 +47,7 @@ See [action.yml](./action.yml) for more detailed information.
 | envs                    | Pass environment variables to shell script                      |               |
 | envs_format             | Flexible configuration of environment value transfer            |               |
 | debug                   | Enable debug mode                                               | false         |
+| allenvs                 | Pass all environment variables to shell script                  | false         |
 
 ## Usage
 
@@ -62,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v0.1.10
+      uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
@@ -163,7 +164,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```yaml
 - name: executing remote ssh commands using password
-  uses: appleboy/ssh-action@v0.1.10
+  uses: appleboy/ssh-action@v1.0.0
   with:
     host: ${{ secrets.HOST }}
     username: ${{ secrets.USERNAME }}
@@ -176,7 +177,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```yaml
 - name: executing remote ssh commands using ssh key
-  uses: appleboy/ssh-action@v0.1.10
+  uses: appleboy/ssh-action@v1.0.0
   with:
     host: ${{ secrets.HOST }}
     username: ${{ secrets.USERNAME }}
@@ -189,7 +190,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```yaml
 - name: multiple command
-  uses: appleboy/ssh-action@v0.1.10
+  uses: appleboy/ssh-action@v1.0.0
   with:
     host: ${{ secrets.HOST }}
     username: ${{ secrets.USERNAME }}
@@ -206,7 +207,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```diff
   - name: multiple host
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
 -     host: "foo.com"
 +     host: "foo.com,bar.com"
@@ -222,7 +223,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```diff
   - name: multiple host
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
 -     host: "foo.com"
 +     host: "foo.com:1234,bar.com:5678"
@@ -237,7 +238,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```diff
   - name: multiple host
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
       host: "foo.com,bar.com"
 +     sync: true
@@ -253,7 +254,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ```diff
   - name: pass environment
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
 +   env:
 +     FOO: "BAR"
 +     BAR: "FOO"
@@ -278,7 +279,7 @@ _Inside `env` object, you need to pass every environment variable as a string, p
 
 ```diff
   - name: stop script if command error
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
       host: ${{ secrets.HOST }}
       username: ${{ secrets.USERNAME }}
@@ -331,7 +332,7 @@ Host FooServer
 
 ```diff
   - name: ssh proxy command
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
       host: ${{ secrets.HOST }}
       username: ${{ secrets.USERNAME }}
@@ -354,7 +355,7 @@ It is not uncommon for files to leak from backups or decommissioned hardware, an
 
 ```diff
   - name: ssh key passphrase
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
       host: ${{ secrets.HOST }}
       username: ${{ secrets.USERNAME }}
@@ -380,7 +381,7 @@ Now you can adjust you config:
 
 ```diff
   - name: ssh key passphrase
-    uses: appleboy/ssh-action@v0.1.10
+    uses: appleboy/ssh-action@v1.0.0
     with:
       host: ${{ secrets.HOST }}
       username: ${{ secrets.USERNAME }}
