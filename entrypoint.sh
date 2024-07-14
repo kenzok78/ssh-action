@@ -8,7 +8,7 @@ export GITHUB="true"
 
 GITHUB_ACTION_PATH="${GITHUB_ACTION_PATH%/}"
 DRONE_SSH_RELEASE_URL="${DRONE_SSH_RELEASE_URL:-https://github.com/appleboy/drone-ssh/releases/download}"
-DRONE_SSH_VERSION="${DRONE_SSH_VERSION:-1.7.4}"
+DRONE_SSH_VERSION="${DRONE_SSH_VERSION:-1.7.7}"
 
 function detect_client_info() {
   if [ -n "${SSH_CLIENT_OS-}" ]; then
@@ -63,4 +63,5 @@ TARGET="${GITHUB_ACTION_PATH}/${CLIENT_BINARY}"
 echo "Will download ${CLIENT_BINARY} from ${DOWNLOAD_URL_PREFIX}"
 curl -fL --retry 3 --keepalive-time 2 "${DOWNLOAD_URL_PREFIX}/${CLIENT_BINARY}" -o ${TARGET}
 chmod +x ${TARGET}
-sh -c "${TARGET} $*"
+sh -c "${TARGET} --version" # print version
+sh -c "${TARGET} $*" # run the command
