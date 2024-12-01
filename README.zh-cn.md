@@ -1,5 +1,7 @@
 # 🚀 用于 GitHub Actions 的 SSH
 
+[English](./README.md) | [繁體中文](./README.zh-tw.md)
+
 [GitHub Action](https://github.com/features/actions) 用于执行远程 SSH 命令。
 
 ![ssh workflow](./images/ssh-workflow.png)
@@ -57,19 +59,18 @@
 name: remote ssh command
 on: [push]
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: whoami
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: whoami
 ```
 
 画面输出
@@ -132,9 +133,9 @@ clip < ~/.ssh/id_ed25519
 
 **来自读者的注意事项**： 根据您的 SSH 版本，您可能还需要进行以下更改：
 
-* 将公钥放在 `.ssh/authorized_keys2` 中
-* 将 `.ssh` 的权限更改为700
-* 将 `.ssh/authorized_keys2` 的权限更改为640
+- 将公钥放在 `.ssh/authorized_keys2` 中
+- 将 `.ssh` 的权限更改为 700
+- 将 `.ssh/authorized_keys2` 的权限更改为 640
 
 ### 如果你使用的是 OpenSSH
 
@@ -227,7 +228,7 @@ ssh-keygen -t ed25519 -a 200 -C ”your_email@example.com“
     username: ${{ secrets.USERNAME }}
     key: ${{ secrets.KEY }}
     port: ${{ secrets.PORT }}
-    script_path: scripts/script.sh 
+    script_path: scripts/script.sh
 ```
 
 #### 多个不同端口的主机
@@ -380,7 +381,7 @@ Host FooServer
 
 设置 SSH 主机指纹验证可以帮助防止中间人攻击。在设置之前，运行以下命令以获取 SSH 主机指纹。请记得将 `ed25519` 替换为您适当的密钥类型（`rsa`、 `dsa`等），而 `example.com` 则替换为您的主机。
 
-现代 OpenSSH 版本中，需要提取的_默认密钥_类型是 `rsa`（从版本 5.1 开始）、`ecdsa`（从版本 6.0 开始）和 `ed25519`（从版本 6.7 开始）。
+现代 OpenSSH 版本中，需要提取的**默认密钥**类型是 `rsa`（从版本 5.1 开始）、`ecdsa`（从版本 6.0 开始）和 `ed25519`（从版本 6.7 开始）。
 
 ```sh
 ssh example.com ssh-keygen -l -f /etc/ssh/ssh_host_ed25519_key.pub | cut -d ’ ‘ -f2

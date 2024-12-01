@@ -1,7 +1,6 @@
 # 🚀 SSH for GitHub Actions
 
-[繁體中文](./README.zh-tw.md)
-[简体中文](./README.zh-cn.md)
+[繁體中文](./README.zh-tw.md) | [简体中文](./README.zh-cn.md)
 
 [GitHub Action](https://github.com/features/actions) for executing remote SSH commands.
 
@@ -60,19 +59,18 @@ Executing remote SSH commands.
 name: remote ssh command
 on: [push]
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
-    - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: linuxserver.io
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: whoami
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: linuxserver.io
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: whoami
 ```
 
 output:
@@ -152,9 +150,9 @@ See the detail information about [SSH login without password](http://www.linuxpr
 
 **A note** from one of our readers: Depending on your version of SSH you might also have to do the following changes:
 
-* Put the public key in `.ssh/authorized_keys2`
-* Change the permissions of `.ssh` to 700
-* Change the permissions of `.ssh/authorized_keys2` to 640
+- Put the public key in `.ssh/authorized_keys2`
+- Change the permissions of `.ssh` to 700
+- Change the permissions of `.ssh/authorized_keys2` to 640
 
 ### If you are using OpenSSH
 
@@ -231,7 +229,7 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
     username: ${{ secrets.USERNAME }}
     key: ${{ secrets.KEY }}
     port: ${{ secrets.PORT }}
-    script_path: scripts/script.sh 
+    script_path: scripts/script.sh
 ```
 
 #### Multiple Hosts
