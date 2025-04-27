@@ -6,13 +6,18 @@
 
 - [🚀 GitHub Actions 的 SSH](#-github-actions-的-ssh)
   - [目錄](#目錄)
-  - [📥 輸入參數](#-輸入參數)
-  - [🚦 使用範例](#-使用範例)
-  - [🔑 設定 SSH 金鑰](#-設定-ssh-金鑰)
-    - [產生 RSA 金鑰](#產生-rsa-金鑰)
-    - [產生 ED25519 金鑰](#產生-ed25519-金鑰)
-  - [🛡️ OpenSSH 相容性](#️-openssh-相容性)
-  - [🧑‍💻 更多用法範例](#-更多用法範例)
+  - [📖 簡介](#-簡介)
+  - [🧩 核心概念與輸入參數](#-核心概念與輸入參數)
+    - [🔌 連線設定](#-連線設定)
+    - [🛠️ 指令設定](#️-指令設定)
+    - [🌐 代理設定](#-代理設定)
+  - [⚡ 快速開始](#-快速開始)
+  - [🔑 SSH 金鑰設定與 OpenSSH 相容性](#-ssh-金鑰設定與-openssh-相容性)
+    - [設定 SSH 金鑰](#設定-ssh-金鑰)
+      - [產生 RSA 金鑰](#產生-rsa-金鑰)
+      - [產生 ED25519 金鑰](#產生-ed25519-金鑰)
+    - [OpenSSH 相容性](#openssh-相容性)
+  - [🛠️ 用法場景與進階範例](#️-用法場景與進階範例)
     - [使用密碼認證](#使用密碼認證)
     - [使用私鑰認證](#使用私鑰認證)
     - [多條指令](#多條指令)
@@ -21,73 +26,102 @@
     - [多主機不同埠號](#多主機不同埠號)
     - [多主機同步執行](#多主機同步執行)
     - [傳遞環境變數到 shell 腳本](#傳遞環境變數到-shell-腳本)
-  - [🌐 使用 ProxyCommand（跳板機）](#-使用-proxycommand跳板機)
-  - [🔒 保護你的私鑰](#-保護你的私鑰)
-  - [🖐️ 主機指紋驗證](#️-主機指紋驗證)
-  - [❓ 常見問題](#-常見問題)
-    - [指令找不到（npm 或其他指令）](#指令找不到npm-或其他指令)
+  - [🌐 代理與跳板機用法](#-代理與跳板機用法)
+  - [🛡️ 安全最佳實踐](#️-安全最佳實踐)
+    - [保護你的私鑰](#保護你的私鑰)
+    - [主機指紋驗證](#主機指紋驗證)
+  - [🚨 錯誤處理與疑難排解](#-錯誤處理與疑難排解)
+    - [常見問題](#常見問題)
+      - [指令找不到（npm 或其他指令）](#指令找不到npm-或其他指令)
   - [🤝 貢獻](#-貢獻)
   - [📝 授權](#-授權)
 
-一個讓你輕鬆安全執行遠端 SSH 指令的 [GitHub Action](https://github.com/features/actions)。
+---
+
+## 📖 簡介
+
+**SSH for GitHub Actions** 是一個強大的 [GitHub Action](https://github.com/features/actions)，可讓你在 CI/CD 工作流程中輕鬆且安全地執行遠端 SSH 指令。  
+本專案以 [Golang](https://go.dev) 和 [drone-ssh](https://github.com/appleboy/drone-ssh) 建立，支援多主機、代理、進階認證等多種 SSH 場景。
 
 ![ssh workflow](./images/ssh-workflow.png)
 
 [![testing main branch](https://github.com/appleboy/ssh-action/actions/workflows/main.yml/badge.svg)](https://github.com/appleboy/ssh-action/actions/workflows/main.yml)
 
-本專案以 [Golang](https://go.dev) 和 [drone-ssh](https://github.com/appleboy/drone-ssh) 建立。
-
 ---
 
-## 📥 輸入參數
+## 🧩 核心概念與輸入參數
+
+本 Action 提供彈性的 SSH 指令執行能力，並具備豐富的設定選項。
 
 完整參數請參閱 [action.yml](./action.yml)。
 
-| 參數                      | 說明                                                  | 預設值 |
-| ------------------------- | ----------------------------------------------------- | ------ |
-| host                      | SSH 主機位址                                          |        |
-| port                      | SSH 埠號                                              | 22     |
-| passphrase                | SSH 私鑰密碼                                          |        |
-| username                  | SSH 使用者名稱                                        |        |
-| password                  | SSH 密碼                                              |        |
-| protocol                  | SSH 協議版本（`tcp`、`tcp4`、`tcp6`）                 | tcp    |
-| sync                      | 指定多個主機時同步執行                                | false  |
-| use_insecure_cipher       | 允許額外（不安全）的加密演算法                        | false  |
-| cipher                    | 允許的加密演算法，未指定時使用預設值                  |        |
-| timeout                   | SSH 連線主機的逾時時間                                | 30s    |
-| command_timeout           | SSH 指令執行逾時時間                                  | 10m    |
-| key                       | SSH 私鑰內容（如 `~/.ssh/id_rsa` 的原始內容）         |        |
-| key_path                  | SSH 私鑰路徑                                          |        |
-| fingerprint               | 主機公鑰的 SHA256 指紋                                |        |
-| proxy_host                | SSH 代理主機                                          |        |
-| proxy_port                | SSH 代理埠號                                          | 22     |
-| proxy_protocol            | SSH 代理協議版本（`tcp`、`tcp4`、`tcp6`）             | tcp    |
-| proxy_username            | SSH 代理使用者名稱                                    |        |
-| proxy_password            | SSH 代理密碼                                          |        |
-| proxy_passphrase          | SSH 代理私鑰密碼                                      |        |
-| proxy_timeout             | SSH 連線代理主機的逾時時間                            | 30s    |
-| proxy_key                 | SSH 代理私鑰內容                                      |        |
-| proxy_key_path            | SSH 代理私鑰路徑                                      |        |
-| proxy_fingerprint         | 代理主機公鑰的 SHA256 指紋                            |        |
-| proxy_cipher              | 代理允許的加密演算法                                  |        |
-| proxy_use_insecure_cipher | 代理允許額外（不安全）的加密演算法                    | false  |
-| script                    | 遠端執行的指令                                        |        |
-| script_path               | 包含要執行指令的檔案路徑                              |        |
-| envs                      | 傳遞給 shell 腳本的環境變數                           |        |
-| envs_format               | 環境變數傳遞的彈性設定                                |        |
-| debug                     | 啟用除錯模式                                          | false  |
-| allenvs                   | 傳遞所有帶 `GITHUB_` 和 `INPUT_` 前綴的環境變數到腳本 | false  |
-| request_pty               | 向伺服器請求偽終端                                    | false  |
-| curl_insecure             | 允許 curl 連線無憑證的 SSL 網站                       | false  |
-| version                   | drone-ssh 執行檔版本，未指定時使用最新版本            |        |
+### 🔌 連線設定
+
+這些參數用於控制如何連線到遠端主機。
+
+| 參數                | 說明                                          | 預設值 |
+| ------------------- | --------------------------------------------- | ------ |
+| host                | SSH 主機位址                                  |        |
+| port                | SSH 埠號                                      | 22     |
+| username            | SSH 使用者名稱                                |        |
+| password            | SSH 密碼                                      |        |
+| protocol            | SSH 協議版本（`tcp`、`tcp4`、`tcp6`）         | tcp    |
+| sync                | 指定多個主機時同步執行                        | false  |
+| timeout             | SSH 連線主機的逾時時間                        | 30s    |
+| key                 | SSH 私鑰內容（如 `~/.ssh/id_rsa` 的原始內容） |        |
+| key_path            | SSH 私鑰路徑                                  |        |
+| passphrase          | SSH 私鑰密碼                                  |        |
+| fingerprint         | 主機公鑰的 SHA256 指紋                        |        |
+| use_insecure_cipher | 允許額外（不安全）的加密演算法                | false  |
+| cipher              | 允許的加密演算法，未指定時使用預設值          |        |
+
+---
+
+### 🛠️ 指令設定
+
+這些參數用於控制在遠端主機上執行的指令及相關行為。
+
+| 參數            | 說明                                                  | 預設值 |
+| --------------- | ----------------------------------------------------- | ------ |
+| script          | 遠端執行的指令                                        |        |
+| script_path     | 包含要執行指令的檔案路徑                              |        |
+| envs            | 傳遞給 shell 腳本的環境變數                           |        |
+| envs_format     | 環境變數傳遞的彈性設定                                |        |
+| allenvs         | 傳遞所有帶 `GITHUB_` 和 `INPUT_` 前綴的環境變數到腳本 | false  |
+| command_timeout | SSH 指令執行逾時時間                                  | 10m    |
+| debug           | 啟用除錯模式                                          | false  |
+| request_pty     | 向伺服器請求偽終端                                    | false  |
+| curl_insecure   | 允許 curl 連線無憑證的 SSL 網站                       | false  |
+| version         | drone-ssh 執行檔版本，未指定時使用最新版本            |        |
+
+---
+
+### 🌐 代理設定
+
+這些參數用於透過代理（跳板機）連線到目標主機。
+
+| 參數                      | 說明                                      | 預設值 |
+| ------------------------- | ----------------------------------------- | ------ |
+| proxy_host                | SSH 代理主機                              |        |
+| proxy_port                | SSH 代理埠號                              | 22     |
+| proxy_username            | SSH 代理使用者名稱                        |        |
+| proxy_password            | SSH 代理密碼                              |        |
+| proxy_passphrase          | SSH 代理私鑰密碼                          |        |
+| proxy_protocol            | SSH 代理協議版本（`tcp`、`tcp4`、`tcp6`） | tcp    |
+| proxy_timeout             | SSH 連線代理主機的逾時時間                | 30s    |
+| proxy_key                 | SSH 代理私鑰內容                          |        |
+| proxy_key_path            | SSH 代理私鑰路徑                          |        |
+| proxy_fingerprint         | 代理主機公鑰的 SHA256 指紋                |        |
+| proxy_cipher              | 代理允許的加密演算法                      |        |
+| proxy_use_insecure_cipher | 代理允許額外（不安全）的加密演算法        | false  |
 
 > **注意：** 如需實現已移除的 `script_stop` 功能，請在 shell 腳本最上方加上 `set -e`。
 
 ---
 
-## 🚦 使用範例
+## ⚡ 快速開始
 
-在工作流程中執行遠端 SSH 指令：
+只需簡單設定，即可在工作流程中執行遠端 SSH 指令：
 
 ```yaml
 name: Remote SSH Command
@@ -121,17 +155,19 @@ linuxserver.io
 
 ---
 
-## 🔑 設定 SSH 金鑰
+## 🔑 SSH 金鑰設定與 OpenSSH 相容性
+
+### 設定 SSH 金鑰
 
 建議於本地端（非遠端伺服器）產生 SSH 金鑰。請以 GitHub Secrets 指定的使用者名稱登入並產生金鑰對：
 
-### 產生 RSA 金鑰
+#### 產生 RSA 金鑰
 
 ```bash
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ```
 
-### 產生 ED25519 金鑰
+#### 產生 ED25519 金鑰
 
 ```bash
 ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
@@ -175,9 +211,7 @@ xclip < ~/.ssh/id_ed25519
 > - 設定 `.ssh` 權限為 700
 > - 設定 `.ssh/authorized_keys2` 權限為 640
 
----
-
-## 🛡️ OpenSSH 相容性
+### OpenSSH 相容性
 
 若出現以下錯誤：
 
@@ -199,7 +233,9 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ---
 
-## 🧑‍💻 更多用法範例
+## 🛠️ 用法場景與進階範例
+
+本節涵蓋常見與進階用法，包括多主機、代理、環境變數傳遞等。
 
 ### 使用密碼認證
 
@@ -331,7 +367,9 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ---
 
-## 🌐 使用 ProxyCommand（跳板機）
+## 🌐 代理與跳板機用法
+
+你可以透過代理（跳板機）連線到遠端主機，適用於進階網路拓撲。
 
 ```bash
 +--------+       +----------+      +-----------+
@@ -376,7 +414,9 @@ Host FooServer
 
 ---
 
-## 🔒 保護你的私鑰
+## 🛡️ 安全最佳實踐
+
+### 保護你的私鑰
 
 密碼短語會加密你的私鑰，即使外洩也無法被攻擊者直接利用。請務必妥善保管私鑰。
 
@@ -394,9 +434,7 @@ Host FooServer
         ls -al
 ```
 
----
-
-## 🖐️ 主機指紋驗證
+### 主機指紋驗證
 
 驗證 SSH 主機指紋有助於防止中間人攻擊。取得主機指紋（將 `ed25519` 換成你的金鑰型別，`example.com` 換成你的主機）：
 
@@ -422,9 +460,11 @@ ssh example.com ssh-keygen -l -f /etc/ssh/ssh_host_ed25519_key.pub | cut -d ' ' 
 
 ---
 
-## ❓ 常見問題
+## 🚨 錯誤處理與疑難排解
 
-### 指令找不到（npm 或其他指令）
+### 常見問題
+
+#### 指令找不到（npm 或其他指令）
 
 若遇到 "command not found" 錯誤，請參考 [此討論](https://github.com/appleboy/ssh-action/issues/31#issuecomment-1006565847) 了解互動式與非互動式 shell 差異。
 

@@ -6,13 +6,18 @@ English | [繁體中文](./README.zh-tw.md) | [简体中文](./README.zh-cn.md)
 
 - [🚀 SSH for GitHub Actions](#-ssh-for-github-actions)
   - [Table of Contents](#table-of-contents)
-  - [📥 Input Parameters](#-input-parameters)
-  - [🚦 Usage Example](#-usage-example)
-  - [🔑 Setting Up SSH Keys](#-setting-up-ssh-keys)
-    - [Generate RSA key](#generate-rsa-key)
-    - [Generate ED25519 key](#generate-ed25519-key)
-  - [🛡️ OpenSSH Compatibility](#️-openssh-compatibility)
-  - [🧑‍💻 More Usage Examples](#-more-usage-examples)
+  - [📖 Introduction](#-introduction)
+  - [🧩 Core Concepts \& Input Parameters](#-core-concepts--input-parameters)
+    - [🔌 Connection Settings](#-connection-settings)
+    - [🛠️ SSH Command Settings](#️-ssh-command-settings)
+    - [🌐 Proxy Settings](#-proxy-settings)
+  - [⚡ Quick Start](#-quick-start)
+  - [🔑 SSH Key Setup \& OpenSSH Compatibility](#-ssh-key-setup--openssh-compatibility)
+    - [Setting Up SSH Keys](#setting-up-ssh-keys)
+      - [Generate RSA key](#generate-rsa-key)
+      - [Generate ED25519 key](#generate-ed25519-key)
+    - [OpenSSH Compatibility](#openssh-compatibility)
+  - [🛠️ Usage Scenarios \& Advanced Examples](#️-usage-scenarios--advanced-examples)
     - [Using password authentication](#using-password-authentication)
     - [Using private key authentication](#using-private-key-authentication)
     - [Multiple commands](#multiple-commands)
@@ -21,73 +26,102 @@ English | [繁體中文](./README.zh-tw.md) | [简体中文](./README.zh-cn.md)
     - [Multiple hosts with different ports](#multiple-hosts-with-different-ports)
     - [Synchronous execution on multiple hosts](#synchronous-execution-on-multiple-hosts)
     - [Pass environment variables to shell script](#pass-environment-variables-to-shell-script)
-  - [🌐 Using ProxyCommand (Jump Host)](#-using-proxycommand-jump-host)
-  - [🔒 Protecting Your Private Key](#-protecting-your-private-key)
-  - [🖐️ Host Fingerprint Verification](#️-host-fingerprint-verification)
-  - [❓ Q\&A](#-qa)
-    - [Command not found (npm or other command)](#command-not-found-npm-or-other-command)
+  - [🌐 Proxy \& Jump Host Usage](#-proxy--jump-host-usage)
+  - [🛡️ Security Best Practices](#️-security-best-practices)
+    - [Protecting Your Private Key](#protecting-your-private-key)
+    - [Host Fingerprint Verification](#host-fingerprint-verification)
+  - [🚨 Error Handling \& Troubleshooting](#-error-handling--troubleshooting)
+    - [Q\&A](#qa)
+      - [Command not found (npm or other command)](#command-not-found-npm-or-other-command)
   - [🤝 Contributing](#-contributing)
   - [📝 License](#-license)
 
-A [GitHub Action](https://github.com/features/actions) for executing remote SSH commands easily and securely.
+---
+
+## 📖 Introduction
+
+**SSH for GitHub Actions** is a powerful [GitHub Action](https://github.com/features/actions) for executing remote SSH commands easily and securely in your CI/CD workflows.  
+Built with [Golang](https://go.dev) and [drone-ssh](https://github.com/appleboy/drone-ssh), it supports a wide range of SSH scenarios, including multi-host, proxy, and advanced authentication.
 
 ![ssh workflow](./images/ssh-workflow.png)
 
 [![testing main branch](https://github.com/appleboy/ssh-action/actions/workflows/main.yml/badge.svg)](https://github.com/appleboy/ssh-action/actions/workflows/main.yml)
 
-This project is built with [Golang](https://go.dev) and [drone-ssh](https://github.com/appleboy/drone-ssh).
-
 ---
 
-## 📥 Input Parameters
+## 🧩 Core Concepts & Input Parameters
+
+This action provides flexible SSH command execution with a rich set of configuration options.
 
 For full details, see [action.yml](./action.yml).
 
-| Parameter                 | Description                                                                       | Default |
-| ------------------------- | --------------------------------------------------------------------------------- | ------- |
-| host                      | SSH host address                                                                  |         |
-| port                      | SSH port number                                                                   | 22      |
-| passphrase                | Passphrase for the SSH private key                                                |         |
-| username                  | SSH username                                                                      |         |
-| password                  | SSH password                                                                      |         |
-| protocol                  | SSH protocol version (`tcp`, `tcp4`, `tcp6`)                                      | tcp     |
-| sync                      | Run synchronously if multiple hosts are specified                                 | false   |
-| use_insecure_cipher       | Allow additional (less secure) ciphers                                            | false   |
-| cipher                    | Allowed cipher algorithms. Uses sensible defaults if unspecified                  |         |
-| timeout                   | Timeout for SSH connection to host                                                | 30s     |
-| command_timeout           | Timeout for SSH command execution                                                 | 10m     |
-| key                       | Content of SSH private key (e.g., raw content of `~/.ssh/id_rsa`)                 |         |
-| key_path                  | Path to SSH private key                                                           |         |
-| fingerprint               | SHA256 fingerprint of the host public key                                         |         |
-| proxy_host                | SSH proxy host                                                                    |         |
-| proxy_port                | SSH proxy port                                                                    | 22      |
-| proxy_protocol            | SSH proxy protocol version (`tcp`, `tcp4`, `tcp6`)                                | tcp     |
-| proxy_username            | SSH proxy username                                                                |         |
-| proxy_password            | SSH proxy password                                                                |         |
-| proxy_passphrase          | SSH proxy key passphrase                                                          |         |
-| proxy_timeout             | Timeout for SSH connection to proxy host                                          | 30s     |
-| proxy_key                 | Content of SSH proxy private key                                                  |         |
-| proxy_key_path            | Path to SSH proxy private key                                                     |         |
-| proxy_fingerprint         | SHA256 fingerprint of the proxy host public key                                   |         |
-| proxy_cipher              | Allowed cipher algorithms for the proxy                                           |         |
-| proxy_use_insecure_cipher | Allow additional (less secure) ciphers for the proxy                              | false   |
-| script                    | Commands to execute remotely                                                      |         |
-| script_path               | Path to a file containing commands to execute                                     |         |
-| envs                      | Environment variables to pass to the shell script                                 |         |
-| envs_format               | Flexible configuration for environment variable transfer                          |         |
-| debug                     | Enable debug mode                                                                 | false   |
-| allenvs                   | Pass all environment variables with `GITHUB_` and `INPUT_` prefixes to the script | false   |
-| request_pty               | Request a pseudo-terminal from the server                                         | false   |
-| curl_insecure             | Allow curl to connect to SSL sites without certificates                           | false   |
-| version                   | drone-ssh binary version. If not specified, the latest version will be used.      |         |
+### 🔌 Connection Settings
+
+These parameters control how the action connects to your remote host.
+
+| Parameter           | Description                                                       | Default |
+| ------------------- | ----------------------------------------------------------------- | ------- |
+| host                | SSH host address                                                  |         |
+| port                | SSH port number                                                   | 22      |
+| username            | SSH username                                                      |         |
+| password            | SSH password                                                      |         |
+| protocol            | SSH protocol version (`tcp`, `tcp4`, `tcp6`)                      | tcp     |
+| sync                | Run synchronously if multiple hosts are specified                 | false   |
+| timeout             | Timeout for SSH connection to host                                | 30s     |
+| key                 | Content of SSH private key (e.g., raw content of `~/.ssh/id_rsa`) |         |
+| key_path            | Path to SSH private key                                           |         |
+| passphrase          | Passphrase for the SSH private key                                |         |
+| fingerprint         | SHA256 fingerprint of the host public key                         |         |
+| use_insecure_cipher | Allow additional (less secure) ciphers                            | false   |
+| cipher              | Allowed cipher algorithms. Uses sensible defaults if unspecified  |         |
+
+---
+
+### 🛠️ SSH Command Settings
+
+These parameters control the commands executed on the remote host and related behaviors.
+
+| Parameter       | Description                                                                       | Default |
+| --------------- | --------------------------------------------------------------------------------- | ------- |
+| script          | Commands to execute remotely                                                      |         |
+| script_path     | Path to a file containing commands to execute                                     |         |
+| envs            | Environment variables to pass to the shell script                                 |         |
+| envs_format     | Flexible configuration for environment variable transfer                          |         |
+| allenvs         | Pass all environment variables with `GITHUB_` and `INPUT_` prefixes to the script | false   |
+| command_timeout | Timeout for SSH command execution                                                 | 10m     |
+| debug           | Enable debug mode                                                                 | false   |
+| request_pty     | Request a pseudo-terminal from the server                                         | false   |
+| curl_insecure   | Allow curl to connect to SSL sites without certificates                           | false   |
+| version         | drone-ssh binary version. If not specified, the latest version will be used.      |         |
+
+---
+
+### 🌐 Proxy Settings
+
+These parameters control the use of a proxy (jump host) for connecting to your target host.
+
+| Parameter                 | Description                                     | Default |
+| ------------------------- | ----------------------------------------------- | ------- |
+| proxy_host                | SSH proxy host                                  |         |
+| proxy_port                | SSH proxy port                                  | 22      |
+| proxy_username            | SSH proxy username                              |         |
+| proxy_password            | SSH proxy password                              |         |
+| proxy_passphrase          | SSH proxy key passphrase                        |         |
+| proxy_protocol            | SSH proxy protocol version                      | tcp     |
+| proxy_timeout             | Timeout for SSH connection to proxy host        | 30s     |
+| proxy_key                 | Content of SSH proxy private key                |         |
+| proxy_key_path            | Path to SSH proxy private key                   |         |
+| proxy_fingerprint         | SHA256 fingerprint of the proxy host public key |         |
+| proxy_cipher              | Allowed cipher algorithms for the proxy         |         |
+| proxy_use_insecure_cipher | Allow insecure ciphers for the proxy            | false   |
 
 > **Note:** To mimic the removed `script_stop` option, add `set -e` at the top of your shell script.
 
 ---
 
-## 🚦 Usage Example
+## ⚡ Quick Start
 
-Run remote SSH commands in your workflow:
+Run remote SSH commands in your workflow with minimal configuration:
 
 ```yaml
 name: Remote SSH Command
@@ -121,17 +155,19 @@ linuxserver.io
 
 ---
 
-## 🔑 Setting Up SSH Keys
+## 🔑 SSH Key Setup & OpenSSH Compatibility
+
+### Setting Up SSH Keys
 
 It is best practice to create SSH keys on your local machine (not on a remote server). Log in with the username specified in GitHub Secrets and generate a key pair:
 
-### Generate RSA key
+#### Generate RSA key
 
 ```bash
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ```
 
-### Generate ED25519 key
+#### Generate ED25519 key
 
 ```bash
 ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
@@ -175,9 +211,7 @@ See more: [SSH login without a password](http://www.linuxproblem.org/art_9.html)
 > - Set `.ssh` permissions to 700
 > - Set `.ssh/authorized_keys2` permissions to 640
 
----
-
-## 🛡️ OpenSSH Compatibility
+### OpenSSH Compatibility
 
 If you see this error:
 
@@ -199,7 +233,9 @@ ssh-keygen -t ed25519 -a 200 -C "your_email@example.com"
 
 ---
 
-## 🧑‍💻 More Usage Examples
+## 🛠️ Usage Scenarios & Advanced Examples
+
+This section covers common and advanced usage patterns, including multi-host, proxy, and environment variable passing.
 
 ### Using password authentication
 
@@ -331,7 +367,9 @@ Default `port` is `22`.
 
 ---
 
-## 🌐 Using ProxyCommand (Jump Host)
+## 🌐 Proxy & Jump Host Usage
+
+You can connect to remote hosts via a proxy (jump host) for advanced network topologies.
 
 ```bash
 +--------+       +----------+      +-----------+
@@ -376,7 +414,9 @@ Host FooServer
 
 ---
 
-## 🔒 Protecting Your Private Key
+## 🛡️ Security Best Practices
+
+### Protecting Your Private Key
 
 A passphrase encrypts your private key, making it useless to attackers if leaked. Always store your private key securely.
 
@@ -394,9 +434,7 @@ A passphrase encrypts your private key, making it useless to attackers if leaked
         ls -al
 ```
 
----
-
-## 🖐️ Host Fingerprint Verification
+### Host Fingerprint Verification
 
 Verifying the SSH host fingerprint helps prevent man-in-the-middle attacks. To get your host's fingerprint (replace `ed25519` with your key type and `example.com` with your host):
 
@@ -422,9 +460,11 @@ Update your config:
 
 ---
 
-## ❓ Q&A
+## 🚨 Error Handling & Troubleshooting
 
-### Command not found (npm or other command)
+### Q&A
+
+#### Command not found (npm or other command)
 
 If you encounter "command not found" errors, see [this issue comment](https://github.com/appleboy/ssh-action/issues/31#issuecomment-1006565847) about interactive vs non-interactive shells.
 
