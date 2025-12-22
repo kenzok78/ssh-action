@@ -45,10 +45,12 @@ English | [繁體中文](./README.zh-tw.md) | [简体中文](./README.zh-cn.md)
 **SSH for GitHub Actions** is a powerful [GitHub Action](https://github.com/features/actions) for executing remote SSH commands easily and securely in your CI/CD workflows.  
 Built with [Golang](https://go.dev) and [drone-ssh](https://github.com/appleboy/drone-ssh), it supports a wide range of SSH scenarios, including multi-host, proxy, and advanced authentication.
 
-![ssh workflow](./images/ssh-workflow.png)
+![ssh workflow](./images/ssh-agent.png)
 
 [![testing main branch](https://github.com/appleboy/ssh-action/actions/workflows/main.yml/badge.svg)](https://github.com/appleboy/ssh-action/actions/workflows/main.yml)
 [![Trivy Security Scan](https://github.com/appleboy/ssh-action/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/appleboy/ssh-action/actions/workflows/trivy-scan.yml)
+
+**Slides:** [SSH for GitHub Actions](https://speakerdeck.com/appleboy/ssh-for-github-actions)
 
 ---
 

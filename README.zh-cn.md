@@ -45,10 +45,12 @@
 **SSH for GitHub Actions** 是一个强大的 [GitHub Action](https://github.com/features/actions)，可让你在 CI/CD 工作流中轻松且安全地执行远程 SSH 命令。  
 本项目基于 [Golang](https://go.dev) 和 [drone-ssh](https://github.com/appleboy/drone-ssh) 构建，支持多主机、代理、高级认证等多种 SSH 场景。
 
-![ssh workflow](./images/ssh-workflow.png)
+![ssh workflow](./images/ssh-agent.png)
 
 [![testing main branch](https://github.com/appleboy/ssh-action/actions/workflows/main.yml/badge.svg)](https://github.com/appleboy/ssh-action/actions/workflows/main.yml)
 [![Trivy Security Scan](https://github.com/appleboy/ssh-action/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/appleboy/ssh-action/actions/workflows/trivy-scan.yml)
+
+**幻灯片：** [SSH for GitHub Actions](https://speakerdeck.com/appleboy/ssh-for-github-actions)
 
 ---
 
