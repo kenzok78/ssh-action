@@ -129,8 +129,8 @@ These parameters control the use of a proxy (jump host) for connecting to your t
 
 This action provides the following outputs that you can use in subsequent steps:
 
-| Output | Description                                                       |
-| ------ | ----------------------------------------------------------------- |
+| Output | Description                                                                |
+| ------ | -------------------------------------------------------------------------- |
 | stdout | Standard output of the executed commands (requires `capture_stdout: true`) |
 
 ---
