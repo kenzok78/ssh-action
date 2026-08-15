@@ -26,6 +26,8 @@ function detect_client_info() {
 
   case "${CLIENT_PLATFORM}" in
   darwin | linux | windows) ;;
+  # Git Bash / MSYS2 / Cygwin on Windows runners report e.g. MINGW64_NT-10.0
+  mingw* | msys* | cygwin*) CLIENT_PLATFORM="windows" ;;
   *) log_error "Unknown or unsupported platform: ${CLIENT_PLATFORM}. Supported platforms are Linux, Darwin, and Windows." "${ERR_UNKNOWN_PLATFORM}" ;;
   esac
 
@@ -39,6 +41,10 @@ function detect_client_info() {
 detect_client_info
 DOWNLOAD_URL_PREFIX="${DRONE_SSH_RELEASE_URL}/v${DRONE_SSH_VERSION}"
 CLIENT_BINARY="drone-ssh-${DRONE_SSH_VERSION}-${CLIENT_PLATFORM}-${CLIENT_ARCH}"
+# Windows release assets are published with an .exe suffix
+if [[ "${CLIENT_PLATFORM}" == "windows" ]]; then
+  CLIENT_BINARY="${CLIENT_BINARY}.exe"
+fi
 TARGET="${GITHUB_ACTION_PATH}/${CLIENT_BINARY}"
 
 # Check if binary already exists and is executable (caching)
