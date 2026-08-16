@@ -162,7 +162,7 @@ Or use ED25519 keys instead (preferred).
 
 The action pins to specific drone-ssh versions via:
 
-- Default: `DRONE_SSH_VERSION="1.8.2"` in `entrypoint.sh`
+- Default: `DRONE_SSH_VERSION="1.8.4"` in `entrypoint.sh`
 - Override: Users can specify `version` input parameter
 
 Update the default version when new drone-ssh releases are available.
