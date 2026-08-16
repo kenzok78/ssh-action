@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# drone-ssh binaries downloaded by entrypoint.sh during local testing
+drone-ssh-*
+checksums.txt
