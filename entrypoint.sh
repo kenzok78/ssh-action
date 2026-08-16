@@ -26,6 +26,8 @@ function detect_client_info() {
 
   case "${CLIENT_PLATFORM}" in
   darwin | linux | windows) ;;
+  # Git Bash / MSYS2 / Cygwin on Windows runners report e.g. MINGW64_NT-10.0
+  mingw* | msys* | cygwin*) CLIENT_PLATFORM="windows" ;;
   *) log_error "Unknown or unsupported platform: ${CLIENT_PLATFORM}. Supported platforms are Linux, Darwin, and Windows." "${ERR_UNKNOWN_PLATFORM}" ;;
   esac
 
@@ -39,6 +41,10 @@ function detect_client_info() {
 detect_client_info
 DOWNLOAD_URL_PREFIX="${DRONE_SSH_RELEASE_URL}/v${DRONE_SSH_VERSION}"
 CLIENT_BINARY="drone-ssh-${DRONE_SSH_VERSION}-${CLIENT_PLATFORM}-${CLIENT_ARCH}"
+# Windows release assets are published with an .exe suffix
+if [[ "${CLIENT_PLATFORM}" == "windows" ]]; then
+  CLIENT_BINARY="${CLIENT_BINARY}.exe"
+fi
 TARGET="${GITHUB_ACTION_PATH}/${CLIENT_BINARY}"
 
 # Check if binary already exists and is executable (caching)
@@ -60,6 +66,37 @@ else
   # Validate downloaded file
   if [[ ! -f "${TARGET}" ]] || [[ ! -s "${TARGET}" ]]; then
     log_error "Downloaded file is missing or empty: ${TARGET}" "${ERR_INVALID_BINARY}"
+  fi
+
+  # Verify checksum; container jobs may lack shasum (Perl) or sha256sum, so
+  # detect an available tool and skip verification with a warning if none exists
+  SHA256_CMD=""
+  if command -v shasum >/dev/null 2>&1; then
+    SHA256_CMD="shasum -a 256"
+  elif command -v sha256sum >/dev/null 2>&1; then
+    SHA256_CMD="sha256sum"
+  else
+    echo "Warning: neither shasum nor sha256sum is available, skipping checksum verification" >&2
+  fi
+
+  if [[ -n "${SHA256_CMD}" ]]; then
+    CHECKSUMS_FILE="${GITHUB_ACTION_PATH}/checksums.txt"
+    if ! curl -fsSL --retry 5 --keepalive-time 2 --location ${INSECURE_OPTION} \
+      "${DOWNLOAD_URL_PREFIX}/checksums.txt" -o "${CHECKSUMS_FILE}"; then
+      log_error "Failed to download checksums.txt from ${DOWNLOAD_URL_PREFIX}." "${ERR_DOWNLOAD_FAILED}"
+    fi
+
+    EXPECTED_CHECKSUM=$(awk -v bin="${CLIENT_BINARY}" '$2 == bin {print $1}' "${CHECKSUMS_FILE}")
+    if [[ -z "${EXPECTED_CHECKSUM}" ]]; then
+      log_error "No checksum entry found for ${CLIENT_BINARY} in checksums.txt." "${ERR_INVALID_BINARY}"
+    fi
+
+    ACTUAL_CHECKSUM=$(${SHA256_CMD} "${TARGET}" | awk '{print $1}')
+    if [[ "${ACTUAL_CHECKSUM}" != "${EXPECTED_CHECKSUM}" ]]; then
+      log_error "Checksum verification failed for ${CLIENT_BINARY}: expected ${EXPECTED_CHECKSUM}, got ${ACTUAL_CHECKSUM}." "${ERR_INVALID_BINARY}"
+    fi
+    echo "Checksum verification passed for ${CLIENT_BINARY}"
+    rm -f "${CHECKSUMS_FILE}"
   fi
 
   chmod +x "${TARGET}"
